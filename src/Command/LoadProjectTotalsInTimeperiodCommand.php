@@ -50,10 +50,10 @@ class LoadProjectTotalsInTimeperiodCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $start_time = $input->getArgument('start_time');
-        $end_time = $input->getArgument('end_time');
-        $start_time_obj = \DateTime::createFromFormat("Y-m-d", $start_time);
-        $end_time_obj = \DateTime::createFromFormat("Y-m-d", $end_time);
+        $startTime = $input->getArgument('start_time');
+        $endTime = $input->getArgument('end_time');
+        $start_time_obj = \DateTime::createFromFormat("Y-m-d", $startTime);
+        $end_time_obj = \DateTime::createFromFormat("Y-m-d", $endTime);
         $start_timestamp = mktime(0, 0, 0, $start_time_obj->format("m"), $start_time_obj->format("d"), $start_time_obj->format("Y"));
         $end_timestamp = mktime(23, 59, 59, $end_time_obj->format("m"), $end_time_obj->format("d"), $end_time_obj->format("Y"));
 
@@ -73,7 +73,7 @@ class LoadProjectTotalsInTimeperiodCommand extends Command
 
         do {
 
-            $search_result = $jira->search("worklogDate <= " . $end_time . " and worklogDate >= " . $start_time . " and timespent > 0", $offset, self::MAX_ISSUES_PER_QUERY, "key,project");
+            $search_result = $jira->search("worklogDate <= " . $endTime . " and worklogDate >= " . $startTime . " and timespent > 0", $offset, self::MAX_ISSUES_PER_QUERY, "key,project");
 
             if ($progress == null) {
                 /** @var ProgressBar $progress */
@@ -124,8 +124,6 @@ class LoadProjectTotalsInTimeperiodCommand extends Command
         $output_lines[] = "project;" . implode(";", $authors);
 
         foreach ($projects as $project) {
-
-
             $hours_per_author = [];
             foreach ($authors as $author) {
                 $hours_per_author[$author] = isset($worked_time[$project][$author]) ? round($worked_time[$project][$author] / 60 / 60) : 0;
@@ -136,18 +134,16 @@ class LoadProjectTotalsInTimeperiodCommand extends Command
 
 
         if ($input->getOption("output_file")) {
-            $output_file = $input->getOption("output_file");
-
-            if (file_put_contents($output_file, implode(PHP_EOL, $output_lines))) {
-                $output->writeln("<info>Output written to " . $output_file . "</info>");
-            } else {
-                $output->writeln("<error>Could not write to " . $output_file . "</error>");
-            }
+            $outputFile = $input->getOption("output_file");
         } else {
-            // Default output mode to console
-            foreach ($output_lines as $output_line) {
-                $output->writeln($output_line);
-            }
+            $outputFile = "{$startTime}-${endTime}.csv";
         }
+
+        if (file_put_contents($outputFile, implode(PHP_EOL, $output_lines))) {
+            $output->writeln("<info>Output written to " . $outputFile . "</info>");
+        } else {
+            $output->writeln("<error>Could not write to " . $outputFile . "</error>");
+        }
+
     }
 }
