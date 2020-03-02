@@ -98,7 +98,7 @@ class LoadProjectTotalsInTimeperiodCommand extends Command
                             continue;
                         }
 
-                        @$worked_time[$issue->getProject()["key"]][$entry["author"]["key"]] += $entry["timeSpentSeconds"];
+                        @$worked_time[$issue->getProject()["key"]][$entry["author"]["displayName"]] += $entry["timeSpentSeconds"];
                     }
                 }
                 $progress->advance();
